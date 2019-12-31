@@ -275,6 +275,7 @@ void do_job(int fd)
             }
                 break;
             case 3:
+                rcnt = send(fd, "\nGooooood Bye ! \n", strlen("\nGooooood Bye ! \n"), 0);
                 break;
     }
 }
