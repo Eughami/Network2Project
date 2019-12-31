@@ -103,6 +103,47 @@ void do_job(int fd)
         user_authenticated = userAuth(recvbuf,rcnt,userId);
        
     }while(!user_authenticated);
+    while (1) 
+    {
+
+        rcnt = send(fd, "\n-----------------------------------", strlen("\n-----------------------------------"), 0);
+        rcnt = send(fd, "\nPlease choose what you want to do\n", strlen("\nPlease choose what you want to do\n"), 0);
+        rcnt = send(fd, "'SEND'.To send  messages to another users\n", strlen("'SEND'.To send  messages to another users\n"), 0);
+        rcnt = send(fd, "'LIST'.To list/delete  messages\n", strlen("'LIST'.To list/delete  messages\n"), 0);
+        rcnt = send(fd, "'EXIT'.To exit\n", strlen("'EXIT'.To exit\n"), 0);
+        rcnt = send(fd, "-----------------------------------", strlen("-----------------------------------"), 0);
+        rcnt = send(fd, "\nYour choise :", strlen("\nYour choise :"), 0);
+        rcnt = recv(fd, recvbuf, recvbuflen, 0);
+        strncpy(choise, recvbuf, 4);
+
+        if (strncasecmp(choise,"send",4 ) == 0) 
+        {
+            userChoice = 1;
+        }
+        else if (strncasecmp(choise,"list",4 ) == 0) 
+        {
+          userChoice = 2;
+        }
+        else if(strncasecmp(choise,"exit",4 ) == 0)
+        {
+            userChoice = 3;
+        }
+        else
+        {
+            userChoice = 0;
+        }
+        switch(userChoice)
+        {
+            case 0:
+            rcnt = send(fd,"wrong choice please try again........\n",strlen("wrong choice please try again........\n"),0);
+            break;
+            case 1:
+                break;
+            case 2:
+                break;
+            case 3:
+                break;
+    }
 }
 
 
