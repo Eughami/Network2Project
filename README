@@ -1,0 +1,3 @@
+compiler server.c with the following command:
+gcc -I. server.c  libiniparser.a -o server
+
