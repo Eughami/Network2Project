@@ -138,6 +138,53 @@ void do_job(int fd)
             rcnt = send(fd,"wrong choice please try again........\n",strlen("wrong choice please try again........\n"),0);
             break;
             case 1:
+                
+            rcnt = send(fd, "\nPlease Enter userId of  whom you want to send a message : \n", strlen("\nPlease Enter userId of  whom you want to send a message :\n"), 0);
+            rcnt = recv(fd, recvbuf, recvbuflen, 0);
+            pDir = opendir("");
+            if (pDir == NULL) 
+            {
+                dirExist = mkdir(serverRoot, 0775);
+                if (!dirExist)
+                  printf("Directory created\n");
+                else 
+                  printf("Unable to create directory,already exist\n");                // strcpy(dirId,serverRoot);
+                strcpy(dirId,serverRoot);
+                strcat(dirId,"/");
+                strncat(dirId, recvbuf, 4);
+                dirExist = mkdir(dirId, 0775);
+                if (!dirExist)
+                  printf("Directory created\n");
+                else 
+                  printf("Unable to create directory,already exist\n");
+            }
+            strcpy(file_to_open, dirId);
+            strcat(file_to_open, "/");
+            strcpy(msg_title, toChar((unsigned long)time(NULL)));
+            strcat(msg_title, "_");
+            strncat(msg_title, recvbuf, 4);
+            strcat(msg_title, "_");
+            rcnt = send(fd, "Please type your message \n", strlen("Please type your message \n"), 0);
+            rcnt = recv(fd, recvbuf, recvbuflen, 0);
+            strncpy(msg_content, recvbuf,(rcnt-1)  );
+            //to clear anything that was already in the buffer
+            msg_content[rcnt-1] = '\0';
+            printf("\nMessage is %s\n", msg_content);
+            strcat(msg_title, toChar(rcnt-1));
+            strcat(msg_title, ".msg");
+            strcat(file_to_open,msg_title);
+            //to save to userId folder
+            fptr = fopen(file_to_open, "w+");
+            fprintf(fptr, msg_content);
+            fclose(fptr);
+            //to save to root folder
+            strcpy(sRoot_title,serverRoot);
+            strcat(sRoot_title,"/");
+            strcat(sRoot_title,msg_title);
+            fptr = fopen(sRoot_title, "w+");
+            printf("root place :%s\n",sRoot_title);
+            fprintf(fptr, msg_content);
+            fclose(fptr);
                 break;
             case 2:
                 break;
