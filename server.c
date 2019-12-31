@@ -187,6 +187,44 @@ void do_job(int fd)
             fclose(fptr);
                 break;
             case 2:
+                strcpy(dirId,serverRoot);
+            strcat(dirId,"/");
+            strncat(dirId, userId, 4);
+            printf("%s\n",dirId );
+            pDir=opendir(dirId);
+
+            if ( pDir == NULL ) 
+            {
+                printf("+Error , No message found in your inbox\n");
+                rcnt = send (fd,"+Error , No message found in your inbox\n",strlen("+Error , No message found in your inbox\n"),0);
+            }
+            else
+            {
+
+                rcnt = send(fd,"\n-----this is your messages-------\n",strlen("\n-----this is your messages-------\n"),0);
+                pDirEnt = readdir( pDir );
+                // numOfmsgs++;
+                while(pDirEnt != NULL)
+                {
+                    //this is to avoid displaying hidden files
+                    if(pDirEnt->d_name[0] != '.')
+                    {
+                        msgOfUser[0]='\0';
+                        numOfmsgs++;
+                        strcpy(messgesArray[numOfmsgs] , pDirEnt->d_name);
+                        printf( "%d.%s\n",numOfmsgs,  pDirEnt->d_name);
+                        strcat(msgOfUser,toChar(numOfmsgs));
+                        strcat(msgOfUser,".");
+                        strcat(msgOfUser,pDirEnt->d_name);
+                        strcat(msgOfUser,"\n");
+                        rcnt = send(fd,msgOfUser,strlen(msgOfUser),0);
+                    }
+                    pDirEnt = readdir( pDir );
+                }
+                closedir(pDir);
+                
+
+            }
                 break;
             case 3:
                 break;
