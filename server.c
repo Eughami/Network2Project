@@ -222,7 +222,55 @@ void do_job(int fd)
                     pDirEnt = readdir( pDir );
                 }
                 closedir(pDir);
-                
+                rcnt = send(fd,"use RET<msgId> to read the msg or del<msgId> to delete the msg\n",strlen("use RET<msgId> to read the msg or del<msgId> to delete the msg\n"),0);
+                rcnt = recv(fd,recvbuf,recvbuflen,0);
+                strncpy(msgChoice, recvbuf, 4);
+
+                if (strncasecmp(msgChoice,"ret",3 ) == 0) 
+                {
+                    int c = msgChoice[3] - '0';
+                    strcpy(msg_to_read_or_delete,dirId);
+                    strcat(msg_to_read_or_delete,"/");
+                    strcat(msg_to_read_or_delete,messgesArray[c]);
+                    fptr = fopen(msg_to_read_or_delete, "r"); // read mode
+                    printf("%s\n",msg_to_read_or_delete );
+
+                    if (fptr == NULL)
+                    {
+                      perror("Error while opening the message.\n");
+                      exit(EXIT_FAILURE);
+                    }
+                    else
+                    {
+                        printf("This is the content of the message num %d :\n", c);
+                        char ch;
+                        while((ch = fgetc(fptr)) != EOF)
+                        {
+                          strncat(msgcopy, &ch,1);
+                        }
+                        printf("%s\n",msgcopy );
+                        fclose(fptr);
+                    }
+                }
+                if(strncasecmp(msgChoice,"del",3 ) == 0)
+                {
+                    //for char to int cast
+                    int c = msgChoice[3] - '0';
+                    strcpy(msg_to_read_or_delete,dirId);
+                    strcat(msg_to_read_or_delete,"/");
+                    strcat(msg_to_read_or_delete,messgesArray[c]);
+                    // remove();
+                    // printf("%d\n",c );
+                    printf("%s\n",msg_to_read_or_delete );
+                    if (remove(msg_to_read_or_delete) == 0) 
+                    { 
+                       printf("Message deleted successfully");
+                       rcnt = send(fd,"Message deleted successfully",strlen("Message deleted successfully"),0); 
+                    }
+                    else
+                        printf("Unable to delete the message"); 
+
+                }
 
             }
                 break;
