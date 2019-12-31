@@ -103,6 +103,13 @@ void do_job(int fd)
         user_authenticated = userAuth(recvbuf,rcnt,userId);
        
     }while(!user_authenticated);
+    
+    const char * welcomeMsg = iniparser_getstring(dict,"server:ServerMsg","NULL");
+    rcnt = send(fd , welcomeMsg,strlen(welcomeMsg),0);
+    //this is option Menu
+    int userChoice = 0;
+    char choise[1000];
+    
     while (1) 
     {
 
