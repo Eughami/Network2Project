@@ -1,46 +1,108 @@
+/* C header files */
 #include <sys/types.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
+#include <dirent.h>
+#include <time.h>
+#include <sys/stat.h>
+#include <unistd.h>
+#include <errno.h>
 
 /* Socket API headers */
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
+#include "iniparser.h"
+
 /* Definations */
 #define DEFAULT_BUFLEN 512
-#define PORT XXXX(Change me!)
+//#define PORT 4239
+DIR * pDir;
+struct dirent * pDirEnt;
+int dirExist;
+int parse_ini_file(char * ini_name);
+FILE * fptr;
+char * toChar(int n) 
+{
+    char * convText, text[100];
+    sprintf(text, "%d", n);
+    convText = text;
+    return convText;
+}
 
-void do_job(int fd) {
-int length,rcnt;
-char recvbuf[DEFAULT_BUFLEN],bmsg[DEFAULT_BUFLEN];
-int  recvbuflen = DEFAULT_BUFLEN;
+bool userAuth(char *a,int size,char userId[])
+{
+    //to remove the next line at the end
+    a[size-1]=0;
+    dictionary *dict;
+    dict=iniparser_load("a.ini");
 
-    // Receive until the peer shuts down the connection
-    do {
+    //there is always on extra char in socket buffer
+    int numOfChars = size - 1,i=0;
+    bool me =false;
+    char *key,*username,*password,*token;
+    /*this is the delimiter when retreving different value
+        from the string */
+    const char *delimiter=" ";
+
+    /*first string is the keyword 
+      Second userId and finally password*/
+    key=strtok(a,delimiter);
+    printf("Key :%s\n",key );
+    username = strtok(NULL,delimiter);
+    printf("Username :%s\n",username );
+    password = strtok(NULL,delimiter);
+    printf("Password :%s\n",password );
+
+    if (strcasecmp(key,"user") != 0)
+    {
+        printf("Error wrong key used should be user or USER\n");
+    }
+    else
+    {
+        printf("checking username and password\n");
+        char userSearchKey[100];
+        strcpy(userSearchKey,"users:");
+        strcat(userSearchKey,username);
+        printf("%s\n",userSearchKey );
+        char *userSearchKeyPass = iniparser_getstring(dict,userSearchKey,"NULL");
+        if ( strcmp(userSearchKeyPass,password) == 0)
+        { 
+            me = true ;
+            strcpy(userId,username);
+            printf("Hello %s  your password is %s\n",username,userSearchKeyPass );
+        }
+        else
+        {
+            printf("%s\n%s\n",userSearchKeyPass,password );
+            printf("Password Incorrect\n");
+        }
+    }
+    return me;
+}
+
+
+void do_job(int fd) 
+{
+    int length,rcnt;
+    char recvbuf[DEFAULT_BUFLEN];
+    int  recvbuflen = DEFAULT_BUFLEN;
+    char userId[4];
+    dictionary *dict;
+    dict=iniparser_load("a.ini");
+    // to authenticate the user
+    bool user_authenticated = false ;
+    do
+    {
+        rcnt = send(fd, "Please write user followed by your userId and password\n ",strlen("Please write user followed by your userId and password\n"),0);
+        rcnt = send(fd, "in the following format <user> <yourId> <yourpassword>\n ",strlen("in the following format <user> <yourId> <yourpassword>\n"),0);
         rcnt = recv(fd, recvbuf, recvbuflen, 0);
-        if (rcnt > 0) {
-            printf("Bytes received: %d\n", rcnt);
-
-        // Echo the buffer back to the sender
-        rcnt = send( fd, recvbuf, rcnt, 0 );
-            if (rcnt < 0) {
-                printf("Send failed:\n");
-                close(fd);
-                break;
-            }
-            printf("Bytes sent: %d\n", rcnt);
-
-        }
-        else if (rcnt == 0)
-            printf("Connection closing...\n");
-        else  {
-            printf("Receive failed:\n");
-            close(fd);
-            break;
-        }
-    } while (rcnt > 0);
+        user_authenticated = userAuth(recvbuf,rcnt,userId);
+       
+    }while(!user_authenticated);
 }
 
 
