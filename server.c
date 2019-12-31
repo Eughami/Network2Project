@@ -132,6 +132,21 @@ void do_job(int fd)
         {
             userChoice = 0;
         }
+        const char * serverRoot = iniparser_getstring(dict, "server:ServerRoot", NULL);
+        char dirId[1000];
+        char file_to_open[1000];
+        char sRoot_title[100];
+        char msg_title[100];
+        char msg_content[10000];
+        //case 2 var
+        int numOfmsgs = 0 ,tu=1;
+        char messgesArray[100][recvbuflen];
+        char msgOfUser[100];
+        char msgChoice[10];
+        char msg_to_read_or_delete[100];
+        int msg_id;
+        char msgcopy[1000];
+
         switch(userChoice)
         {
             case 0:
